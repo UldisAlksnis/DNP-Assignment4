@@ -17,11 +17,12 @@ namespace Assignment1.Data {
             client = new HttpClient();
         }
 
-        public async Task<IList<Adult>> GetAdults() {
+        public async Task<IList<Adult>> GetAdults()
+        {
             Task<string> stringAsync = client.GetStringAsync(uri1+"/Adults");
             string message = await stringAsync;
             List<Adult> result = JsonSerializer.Deserialize<List<Adult>>(message);
-            return result;
+           return result;
         }
 
         public async Task AddAdultAsync(Adult adult) {
@@ -60,5 +61,6 @@ namespace Assignment1.Data {
                 "application/json");
             await client.PostAsync($"{uri1}/Adults/{adult.Id}", content);
         }
+
     }
 }

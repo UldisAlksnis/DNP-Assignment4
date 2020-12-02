@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using DNP_Assignment3.Models;
-using SQLitePCL;
+using DNP_Assignment3.Data;
 
 namespace DNP_Assignment3.Controllers
 {
@@ -14,54 +14,33 @@ namespace DNP_Assignment3.Controllers
     [ApiController]
     public class UsersController : ControllerBase
     {
-        private readonly UserContext _context;
+        private readonly IUserLogin _userLogin;
 
-        public UsersController(UserContext context)
+        public UsersController(IUserLogin userLogin)
         {
-            _context = context;
+            _userLogin = userLogin;
         }
 
         // GET: api/Users/5
         [HttpGet("{userName}")]
-        public async Task<ActionResult<UserDTO>> GetUser(string userName)
+        public async Task<ActionResult<User>> GetUser(string userName)
         {
-            User admin = new User
-            {
-                Id = 1,
-                City = "Horsens",
-                Domain = "assignment1.family",
-                Password = "111111",
-                Role = "Admin",
-                BirthYear = 1997,
-                SecurityLevel = 4,
-                UserName = "Admin"
-            };
 
-            if (admin.UserName.Equals(userName))
+            try
             {
-                return ItemToDTO(admin);
-            }
-            else
-            {
+                User user = await _userLogin.ValidateUser(userName);
+                if (user != null)
+                {
+                    return Ok(user);
+                }
+                    
                 return NotFound();
             }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return StatusCode(500, e.Message);
+            }
         }
-
-
-        private bool UserExists(string userName)
-        {
-            return _context.Users.Any(e => e.UserName == userName);
-        }
-        private static UserDTO ItemToDTO(User user) =>
-        new UserDTO
-        {
-            UserName = user.UserName,
-            Domain = user.Domain,
-            City = user.City,
-            BirthYear = user.BirthYear,
-            Role = user.Role,
-            SecurityLevel = user.SecurityLevel,
-            Password = user.Password
-        };
     }
 }

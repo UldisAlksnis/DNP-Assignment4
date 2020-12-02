@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using DNP_Assignment3.Models;
+using DNP_Assignment3.Data;
 
 namespace DNP_Assignment3.Controllers
 {
@@ -13,53 +14,59 @@ namespace DNP_Assignment3.Controllers
     [ApiController]
     public class AdultsController : ControllerBase
     {
-        private readonly AdultContext _context;
+        private readonly IAdultService _adultService;
 
-        public AdultsController(AdultContext context)
+        public AdultsController(IAdultService adultService)
         {
-            _context = context;
-        }
-
-        // GET: api/Adults
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Adult>>> GetAdults()
-        {
-            return await _context.Adults.ToListAsync();
+            _adultService = adultService;
         }
 
         // GET: api/Adults/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Adult>> GetAdult(int id)
+        [HttpGet]
+        public async Task<ActionResult<IList<Adult>>>
+            GetAdults([FromQuery] int? id, [FromQuery] String firstname, [FromQuery] String lastname)
         {
-            var adult = await _context.Adults.FindAsync(id);
-
-            if (adult == null)
+            IList<Adult> adults;
+            try
             {
-                return NotFound();
-            }
+                IList<Adult> filteredAdults = await _adultService.GetAdultsAsync();
+                if (id != null)
+                {
 
-            return adult;
+                    adults = filteredAdults.Where(a => a.Id == id).ToList();
+                }
+                else if (firstname != null)
+                {
+
+                    adults = filteredAdults.Where(a => a.FirstName.Equals(firstname, StringComparison.OrdinalIgnoreCase)).ToList();
+                }
+                else if (lastname != null)
+                {
+
+                    adults = filteredAdults.Where(a => a.LastName.Equals(lastname, StringComparison.OrdinalIgnoreCase)).ToList();
+                }
+                else
+                {
+                    adults = await _adultService.GetAdultsAsync();
+                }
+                return Ok(adults);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return StatusCode(500, e.Message);
+
+            }
         }
 
         // PUT: api/Adults/5
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
-        [HttpPost("{id}")]
+        /*[HttpPost("{id}")]
         public async Task<IActionResult> PostAdult(int id, Adult adult)
         {
-            Adult adultToModify = await _context.Adults.FindAsync(id);
-            if (adultToModify == null)
-            {
-                return NotFound();
-            }
-            else
-            {
-                adultToModify.Update(adult);
-            }
-            await _context.SaveChangesAsync();
-
-            //return CreatedAtAction("GetAdult", new { id = adult.Id }, adult);
-            return CreatedAtAction(nameof(GetAdult), new { id = adult.Id }, adult);
+            Adult adultToModify = await _adultService.ModifyAdult(int id, Adult adult);
+            return Ok();
         }
 
         // POST: api/Adults
@@ -68,8 +75,8 @@ namespace DNP_Assignment3.Controllers
         [HttpPut]
         public async Task<ActionResult<Adult>> PutAdult(Adult adult)
         {
-            _context.Adults.Add(adult);
-            await _context.SaveChangesAsync();
+            _adultService.Adults.Add(adult);
+            await _adultService.SaveChangesAsync();
 
             //return CreatedAtAction("GetAdult", new { id = adult.Id }, adult);
             return CreatedAtAction(nameof(GetAdult), new { id = adult.Id }, adult);
@@ -79,21 +86,21 @@ namespace DNP_Assignment3.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult<Adult>> DeleteAdult(int id)
         {
-            var adult = await _context.Adults.FindAsync(id);
+            var adult = await _adultService.Adults.FindAsync(id);
             if (adult == null)
             {
                 return NotFound();
             }
 
-            _context.Adults.Remove(adult);
-            await _context.SaveChangesAsync();
+            _adultService.Adults.Remove(adult);
+            await _adultService.SaveChangesAsync();
 
             return adult;
         }
 
         private bool AdultExists(int id)
         {
-            return _context.Adults.Any(e => e.Id == id);
-        }
+            return _adultService.Adults.Any(e => e.Id == id);
+        }*/
     }
 }

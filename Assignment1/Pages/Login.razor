@@ -41,6 +41,7 @@
             ((CustomAuthenticationStateProvider)AuthenticationStateProvider).ValidateLogin(username, password);
             username = "";
             password = "";
+            NavigationManager.NavigateTo("/Security");
         }
         catch (Exception e)
         {
@@ -56,7 +57,7 @@
         try
         {
             ((CustomAuthenticationStateProvider)AuthenticationStateProvider).Logout();
-            NavigationManager.NavigateTo("/");
+            NavigationManager.NavigateTo("/Security");
         }
         catch (Exception e) { }
     }

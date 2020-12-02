@@ -12,6 +12,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
 using DNP_Assignment3.Models;
+using DNP_Assignment3.Data;
 
 namespace DNP_Assignment3
 {
@@ -27,11 +28,10 @@ namespace DNP_Assignment3
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<AdultContext>(opt =>
-            opt.UseInMemoryDatabase("AdultList"));
-            services.AddDbContext<UserContext>(opt =>
-            opt.UseInMemoryDatabase("UserList"));
-            
+            services.AddDbContext<DataContext>();
+            services.AddScoped<IUserLogin, UserLogin>();
+            services.AddScoped<IAdultService, AdultService>();
+
             services.AddControllers();
         }
 
